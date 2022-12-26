@@ -167,7 +167,7 @@ class _HomePageState extends State<homePage> {
 
     return WillPopScope(
         onWillPop: () async {
-          globals.onWillPop(context);
+          return globals.onWillPop(context);
         },
         child: Scaffold(
           appBar: AppBar(
