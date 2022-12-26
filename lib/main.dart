@@ -1,41 +1,41 @@
 import 'package:flutter/material.dart';
+import 'splash.dart';
+import 'homePage.dart';
+import 'settings.dart';
+import 'signInPage.dart';
+import 'globals.dart' as globals;
 
-void main() => runApp(MyApp());
+main() {
+  runApp(const MyApp());
+// Setting Globals
+  globals.initSPHelper();
+  globals.initSPHelper().whenComplete(() {
+    globals.gsUserName = globals.SPHelper.sp.get("useremail")!;
+    globals.gsPassword = globals.SPHelper.sp.get("userpassword")!;
+  });
+}
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Application name
-      title: 'Flutter Hello World',
-      // Application theme data, you can set the colors for the application as
-      // you want
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      // A widget which will be started on application startup
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  final String title;
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        // The title text which will be shown on the action bar
-        title: Text(title),
-      ),
-      body: Center(
-        child: Text(
-          'Hello, World!',
+        // in the below line, we are specifying title of our app.
+        title: 'A Cleaner World',
+        // in the below line, we are hiding our debug banner.
+        debugShowCheckedModeBanner: false,
+        // in the below line, we are specifying theme.
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
         ),
-      ),
-    );
+        // First Screen of our App
+        home: const Splash(),
+        routes: <String, WidgetBuilder>{
+          signInPage.route: (context) => const signInPage(),
+          homePage.route: (context) => const homePage(),
+          settings.route: (context) => const settings()
+        });
   }
 }
