@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -166,117 +165,124 @@ class _HomePageState extends State<homePage> {
       ),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-          title: const Text('A Cleaner World',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0)),
-          centerTitle: true,
-          actions: <Widget>[
-            Text(
-              globals.gUser?.email ?? "",
-              style: const TextStyle(color: Colors.amber, fontSize: 12),
-            ),
-          ]),
-      drawer: buildDrawer(context, homePage.route),
-      body: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 0, bottom: 8),
-              child: _serviceError!.isEmpty
-                  ? Text(
-                      'Din position: (${currentLatLng.latitude}, ${currentLatLng.longitude}) og Zoom=$_currentZoom')
-                  //Text('This is a map that is showing (${currentLatLng.latitude}, ${currentLatLng.longitude}) and zoom=${_mapController.zoom}.')
-                  : Text(
-                      'Fejl ved at finde din lokation. Fejl Besked : $_serviceError'),
-            ),
-            Flexible(
-              child: FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  maxZoom: 18.49,
-                  center:
-                      LatLng(currentLatLng.latitude, currentLatLng.longitude),
-                  interactiveFlags: interActiveFlags,
+    return WillPopScope(
+        onWillPop: () async {
+          globals.onWillPop(context);
+        },
+        child: Scaffold(
+          appBar: AppBar(
+              title: const Text('A Cleaner World',
+                  style:
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0)),
+              centerTitle: true,
+              actions: <Widget>[
+                Text(
+                  globals.gUser?.email ?? "",
+                  style: const TextStyle(color: Colors.amber, fontSize: 12),
                 ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-                  ),
-                  MarkerLayer(markers: markers),
-                  PolylineLayer(
-                    polylines: [
-                      Polyline(
-                          isDotted: true,
-                          points: currpoints,
-                          strokeWidth: 4,
-                          color: Colors.green),
+              ]),
+          drawer: buildDrawer(context, homePage.route),
+          body: Padding(
+            padding: const EdgeInsets.all(2),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 0, bottom: 8),
+                  child: _serviceError!.isEmpty
+                      ? Text(
+                          'Din position: (${currentLatLng.latitude}, ${currentLatLng.longitude}) og Zoom=$_currentZoom')
+                      //Text('This is a map that is showing (${currentLatLng.latitude}, ${currentLatLng.longitude}) and zoom=${_mapController.zoom}.')
+                      : Text(
+                          'Fejl ved at finde din lokation. Fejl Besked : $_serviceError'),
+                ),
+                Flexible(
+                  child: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      maxZoom: 18.49,
+                      center: LatLng(
+                          currentLatLng.latitude, currentLatLng.longitude),
+                      interactiveFlags: interActiveFlags,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName:
+                            'dev.fleaflet.flutter_map.example',
+                      ),
+                      MarkerLayer(markers: markers),
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                              isDotted: true,
+                              points: currpoints,
+                              strokeWidth: 4,
+                              color: Colors.green),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: Builder(builder: (BuildContext context) {
-        return FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _liveUpdate = !_liveUpdate;
-              if (_liveUpdate) {
-                if (debug) debugPrint("Start Button pressed");
-                _mapController.move(
-                    LatLng(currentLatLng.latitude, currentLatLng.longitude),
-                    18.49);
-                interActiveFlags = InteractiveFlag.rotate |
-                    InteractiveFlag.pinchZoom |
-                    InteractiveFlag.doubleTapZoom;
-                // Todo call dialog box to start recording trip in to an array
-                //Clear trip and polyline
-                currentTrip.clear();
-                currpoints.clear();
-                startTime_ = DateTime.now();
+          ),
+          floatingActionButton: Builder(builder: (BuildContext context) {
+            return FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  _liveUpdate = !_liveUpdate;
+                  if (_liveUpdate) {
+                    if (debug) debugPrint("Start Button pressed");
+                    _mapController.move(
+                        LatLng(currentLatLng.latitude, currentLatLng.longitude),
+                        18.49);
+                    interActiveFlags = InteractiveFlag.rotate |
+                        InteractiveFlag.pinchZoom |
+                        InteractiveFlag.doubleTapZoom;
+                    // Todo call dialog box to start recording trip in to an array
+                    //Clear trip and polyline
+                    currentTrip.clear();
+                    currpoints.clear();
+                    startTime_ = DateTime.now();
 
-                // Snackbar messsage
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text(
-                      'Din tur registreres nu, og kun zoom og rotation virker nu.'),
-                ));
-              } else {
-                if (debug) debugPrint("Stop/resume Button pressed");
-                _mapController.move(
-                    LatLng(currentLatLng.latitude, currentLatLng.longitude),
-                    18.49);
-                interActiveFlags = InteractiveFlag.all;
-                // Todo call dialog box to stop recording current trip or cancel trip. Get notes and kg litter collected and update Database.
+                    // Snackbar messsage
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                          'Din tur registreres nu, og kun zoom og rotation virker nu.'),
+                    ));
+                  } else {
+                    if (debug) debugPrint("Stop/resume Button pressed");
+                    _mapController.move(
+                        LatLng(currentLatLng.latitude, currentLatLng.longitude),
+                        18.49);
+                    interActiveFlags = InteractiveFlag.all;
+                    // Todo call dialog box to stop recording current trip or cancel trip. Get notes and kg litter collected and update Database.
 
-                // Dialog: Do you want to save this trip ?.
-                // Ask for trip litter weight in kg approx.
-                // Calculate trip length in meters
-                if (debug) debugPrint("Before end Dialog");
-                showEndTripDialog(context, "Afslut tur eller fortsæt ?", 2);
-                if (debug) debugPrint("After end Dialog");
+                    // Dialog: Do you want to save this trip ?.
+                    // Ask for trip litter weight in kg approx.
+                    // Calculate trip length in meters
+                    if (debug) debugPrint("Before end Dialog");
+                    showEndTripDialog(context, "Afslut tur eller fortsæt ?", 2);
+                    if (debug) debugPrint("After end Dialog");
 
-                // Add trip to database and draw current trip on Polyline layer
-                if (debug) {
-                  for (var trip in currentTrip) {
-                    debugPrint("lat is: ${trip.lat} and long is: ${trip.long}");
-                    // currpoints.add(LatLng(trip.lat,trip.long));
+                    // Add trip to database and draw current trip on Polyline layer
+                    if (debug) {
+                      for (var trip in currentTrip) {
+                        debugPrint(
+                            "lat is: ${trip.lat} and long is: ${trip.long}");
+                        // currpoints.add(LatLng(trip.lat,trip.long));
+                      }
+                    }
                   }
-                }
-              }
-            });
-          },
-          child: _liveUpdate
-              ? const Icon(Icons.stop_sharp)
-              : const Icon(Icons.play_arrow),
-        );
-      }),
-    );
+                });
+              },
+              child: _liveUpdate
+                  ? const Icon(Icons.stop_sharp)
+                  : const Icon(Icons.play_arrow),
+            );
+          }),
+        ));
   }
 
   // End Trip
